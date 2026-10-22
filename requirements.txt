@@ -4,6 +4,7 @@ joblib==1.5.3
 numpy==2.5.4
 pandas==3.0.6
 pydantic==2.14.1
+pytest==8.4.2
 scikit-learn==1.8.0
 shap==0.51.0
 sqlmodel==0.0.48
