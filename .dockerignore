@@ -10,7 +10,9 @@ env/
 .ipynb_checkpoints/
 .virtual_documents/
 *.ipynb
-logs.db
+tests/
+.pytest_cache/
+.idea/
 Dockerfile
 docker-compose.yml
 compose.yaml
