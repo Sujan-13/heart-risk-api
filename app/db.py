@@ -27,12 +27,9 @@ class PredictionLogPublic(LogBase):
     id:int
 
 
-sql_path = f"sqlite:///{(Path(__file__).resolve().parent.parent / 'app' / 'logs.db').as_posix()}"
-sqlite_url = os.getenv("DATABASE_URL", sql_path)
-print(sqlite_url)
-
-connect_args = {"check_same_thread": False}
-engine = create_engine(sqlite_url, connect_args=connect_args)
+db_path = f"sqlite:///{(Path(__file__).resolve().parent.parent / 'app' / 'logs.db').as_posix()}"
+db_url = os.getenv("DATABASE_URL", db_path)
+engine = create_engine(db_url)
 
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
