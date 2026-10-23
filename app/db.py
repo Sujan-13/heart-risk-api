@@ -5,6 +5,13 @@ from sqlmodel import Field, Session, SQLModel, create_engine, select, Column,JSO
 from typing import Annotated
 from fastapi import Depends, Query
 from pathlib import Path
+from dotenv import load_dotenv
+import os
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
+
+
 class LogBase(SQLModel):
     patientData: dict = Field(sa_column=Column(JSON))
     probability: float
@@ -20,10 +27,10 @@ class PredictionLogPublic(LogBase):
     id:int
 
 
-import os
 sql_path = f"sqlite:///{(Path(__file__).resolve().parent.parent / 'app' / 'logs.db').as_posix()}"
-print(sql_path)
 sqlite_url = os.getenv("DATABASE_URL", sql_path)
+print(sqlite_url)
+
 connect_args = {"check_same_thread": False}
 engine = create_engine(sqlite_url, connect_args=connect_args)
 
