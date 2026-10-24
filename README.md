@@ -102,7 +102,7 @@ flowchart LR
 
 ## The model
 
-- **Data:** [dataset name and link], [number of rows] patients, 11 input features, binary target `HeartDisease`.
+- **Data:** [https://www.kaggle.com/datasets/fedesoriano/heart-failure-prediction], 918 patients, 11 input features, binary target `HeartDisease`.
 - **Preprocessing (inside the pipeline):**
   - Zero values in `Cholesterol` are not real measurements, so they are treated as missing and imputed with KNN. Because this happens inside the pipeline, the imputer is fitted only on training data and nothing leaks from the test set.
   - Categorical features are one-hot encoded.
