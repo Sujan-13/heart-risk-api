@@ -12,6 +12,7 @@
 ![Render](https://img.shields.io/badge/Deployed%20on-Render-46E3B7)
 
 ### 🔗 [Live demo (interactive API docs)](https://heart-risk-api-lda6.onrender.com/docs)
+### 🔗 [Live demo (Streamlit Dashboard)](https://heart-risk-api-nn7ie6uyvpwmxbnu2x3fr9.streamlit.app/)
 
 > The demo runs on a free tier, so the first request after inactivity can take about a minute while the service wakes up.
 >
