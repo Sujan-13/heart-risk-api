@@ -17,7 +17,12 @@
 >
 > **Disclaimer:** This is a learning project, not a medical device. Do not use it for medical decisions.
 
-![Swagger UI of the live API](docs/swagger-ui.png)
+### User Interfaces & Endpoints
+
+| FastAPI Swagger Documentation | Interactive Streamlit Dashboard |
+| :---: | :---: |
+| ![Swagger UI of the live API](docs/swagger-ui.png) | ![Streamlit Dashboard Preview](docs/streamlit-dashboard.png) |
+| *Test REST endpoints, validate Pydantic schemas, and inspect `/predict` & `/explain` payloads.* | *Filter cohorts dynamically, view real-time metrics, analyze risk distribution charts, and download data.* |
 
 ---
 
@@ -26,13 +31,14 @@
 Most machine-learning projects stop at a notebook. This one covers the rest of the path that a team needs before a model is useful:
 
 1. **Model:** an XGBoost classifier in a scikit-learn pipeline, tuned with Optuna.
-2. **Explainability:** every prediction can be explained with SHAP, so a user sees *why* the model answered as it did.
-3. **API:** a validated REST service built with FastAPI.
-4. **Persistence:** every prediction is logged to a database (PostgreSQL in production).
-5. **Packaging:** a production-style Docker image (non-root user, health check).
-6. **Quality:** automated tests with pytest, run on every push by GitHub Actions.
-7. **Deployment:** live on Render, redeployed from the `main` branch.
-
+2. **Statistics:** To ensure model reliability and statistical rigor prior to training, feature relationships and data integrity were validated using statistical hypothesis testings.
+3. **Explainability:** every prediction can be explained with SHAP, so a user sees *why* the model answered as it did.
+4. **API:** a validated REST service built with FastAPI.
+5. **Persistence:** every prediction is logged to a database (PostgreSQL in production).
+6. **Packaging:** a production-style Docker image (non-root user, health check).
+7. **Quality:** automated tests with pytest, run on every push by GitHub Actions.
+8. **Deployment:** live on Render, redeployed from the `main` branch.
+9. **Dashboard:** an interactive Streamlit tool for exploratory data analysis and statistical evaluation.
 ---
 
 ## API
@@ -99,6 +105,30 @@ flowchart LR
 **Tech stack:** Python 3.12 · FastAPI · Pydantic · scikit-learn · XGBoost · Optuna · SHAP · SQLModel / SQLAlchemy · PostgreSQL · Docker · pytest · GitHub Actions · Render
 
 ---
+
+## Statistical Validation & Data Pipeline
+
+To ensure model reliability and statistical rigor prior to training, feature relationships and data integrity were validated using statistical hypothesis testings.
+
+### Statistical Hypothesis Testing
+Each input feature was evaluated against `HeartDisease` to test for significant group differences:
+- **Categorical Features:** Chi-square test of independence ($\chi^2$) paired with **Cramér's V** for effect size.
+- **Continuous Features:** Welch's t-test ($t$) with **Cohen's d** for effect size.
+- **Multiple Testing Correction:** Applied **Holm-Bonferroni correction** (`statsmodels.stats.multitest.multipletests`) across all $p$-values to control the Family-Wise Error Rate (FWER) and eliminate false positives.
+
+| Feature | Statistical Test | Raw $p$-value | Effect Size | Adjusted $p$-value (Holm) | Null Hypothesis Rejected? |
+|---|---|---|---|---|---|
+| `ST_Slope` | Chi-square | $7.57 \times 10^{-78}$ | $V = 0.62$ | $8.32 \times 10^{-77}$ | **True** |
+| `ChestPainType` | Chi-square | $5.35 \times 10^{-58}$ | $V = 0.54$ | $5.35 \times 10^{-57}$ | **True** |
+| `ExerciseAngina` | Chi-square | $1.90 \times 10^{-50}$ | $V = 0.50$ | $1.71 \times 10^{-49}$ | **True** |
+| `Oldpeak` | Welch's t-test | $2.61 \times 10^{-40}$ | $d = -0.96$ | $2.09 \times 10^{-39}$ | **True** |
+| `MaxHR` | Welch's t-test | $1.02 \times 10^{-36}$ | $d = 0.90$ | $7.11 \times 10^{-36}$ | **True** |
+| `Age` | Welch's t-test | $6.56 \times 10^{-18}$ | $d = -0.61$ | $3.28 \times 10^{-17}$ | **True** |
+| `RestingBP` | Welch's t-test | $2.81 \times 10^{-4}$ | $d = -0.24$ | $8.43 \times 10^{-4}$ | **True** |
+| `Cholesterol` | Welch's t-test | $2.13 \times 10^{-2}$ | $d = -0.16$ | $2.13 \times 10^{-2}$ | **True** |
+| `RestingECG` | Chi-square | $3.95 \times 10^{-3}$ | $V = 0.11$ | $7.89 \times 10^{-3}$ | **True** |
+
+> **Key Finding:** Exercise test markers (`ST_Slope`, `Oldpeak`, `ExerciseAngina`, `MaxHR`) exhibit the largest effect sizes ($|d| > 0.8$ or $V > 0.5$), directly mirroring the top features identified by SHAP values.
 
 ## The model
 
@@ -258,6 +288,7 @@ DATABASE_URL=postgresql://user:password@host:5432/dbname
 
 ```
 app/                 FastAPI application (main.py, schemas.py, db.py)
+dashboard/           Streamlit interactive data explorer (app.py)
 model/               Saved scikit-learn pipeline (pipeline.joblib)
 tests/               API tests
 Dataset/             Source data
@@ -280,6 +311,7 @@ Run `train.ipynb` to rebuild the pipeline and save it to `model/pipeline.joblib`
 | Skill | Where to see it |
 |---|---|
 | Python backend and REST API design | `app/main.py`, `app/schemas.py` |
+| Interactive Dashboard Design | dashboard/app.py (Streamlit) |
 | Input validation | Pydantic models, `422` responses |
 | ML pipelines and tuning | `train.ipynb` (scikit-learn, XGBoost, Optuna) |
 | Explainable AI | SHAP plot and the `/explain` endpoint |
